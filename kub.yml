@@ -1,0 +1,55 @@
+---
+- hosts: kub
+  become: true
+  tasks:
+  - name: comment out swap in /etc/fstab
+    replace:
+      path: /etc/fstab
+      regexp: '^(\s*[^#]+\s+none\s+swap\s.*)'
+      replace: '#\1'
+  - name: check whether there are mounted swap partitions
+    shell: swapon --noheadings | wc -l
+    register: num_mounted_swap_partitions
+    changed_when: false
+  - name: unmount all mounted swap partitions
+    shell: swapoff -a
+    when: num_mounted_swap_partitions.stdout > "0"
+  - name: add docker apt repository
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+      state: present
+  - name: add kubernetes apt repository
+    apt_repository:
+      repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+      state: present
+      filename: 'kubernetes'
+  - name: apt update
+    apt:
+      update_cache: yes
+      cache_valid_time: 86400
+  - name: install/upgrade docker
+    apt:
+      name: docker-ce=17.03.*
+      state: present
+  - name: install/upgrade kubelet
+    apt:
+      name: kubelet=1.9.*
+      state: present
+  - name: install/upgrade kubeadm
+    apt:
+      name: kubeadm=1.9.*
+      state: present
+  - name: install/upgrade kubectl
+    apt:
+      name: kubectl=1.9.*
+      state: present
+  - name: configure passing bridged IPv4 traffic to iptables
+    sysctl:
+      name: net.bridge.bridge-nf-call-iptables
+      value: 1
+      state: present
+      sysctl_set: yes
+  - name: get kubectl version
+    shell: kubever=$(kubectl --kubeconfig /etc/kubernetes/admin.conf version | base64 | tr -d '\n') echo $kubever
+    register: kubever
+  - debug: var=kubever

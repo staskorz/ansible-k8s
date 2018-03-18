@@ -1,0 +1,25 @@
+- debconf:
+    name: mysql-server
+    question: mysql-server/root_password
+    value: devops
+    vtype: password
+- debconf:
+    name: mysql-server
+    question: mysql-server/root_password_again
+    value: devops
+    vtype: password
+- apt:
+    update_cache: true
+    cache_valid_time: 3600
+    name: mysql-server
+    state: present
+- apt:
+    update_cache: true
+    cache_valid_time: 3600
+    name: python-mysqldb
+    state: present
+- mysql_db:
+    name: ansible
+    state: present
+    login_user: root
+    login_password: devops

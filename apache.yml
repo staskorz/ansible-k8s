@@ -1,0 +1,23 @@
+---
+- hosts: apache
+  become: true
+  roles:
+  - apache
+  # tasks:
+    # - name: install apache on ubuntu
+    #   ping:
+    # - name: debug
+    #   debug:
+    #     var: ansible_distribution
+  # - name: apt install apache2
+  #   apt:
+  #     update_cache: true
+  #     name: apache2
+  #     state: present
+  #   when: ansible_distribution == "Ubuntu"
+  # - name: yum install httpd
+  #   yum:
+  #     update_cache: true
+  #     name: httpd
+  #     state: present
+  #   when: ansible_distribution == "CentOS"
